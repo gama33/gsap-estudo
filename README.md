@@ -1,1 +1,1 @@
-![alt text](src\assets\capa.png "Capa")
+![alt text](gsap-estudo/src/assets/capa.png "Capa")
