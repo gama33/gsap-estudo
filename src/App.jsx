@@ -1,34 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useRef } from 'react'
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { SplitText } from 'gsap/SplitText';
 import './App.css'
 
+gsap.registerPlugin(useGSAP, SplitText);
+
 function App() {
-  const [count, setCount] = useState(0)
+  const container = useRef();
+  const st = SplitText.create("p", {
+    type: "chars",
+    charsClass: "char",
+  })
+
+  st.chars.forEach((char) => { 
+    gsap.set(char, { 
+      attr: {
+        "data-content": char.innerHTML
+      }
+    })
+  });
+
+  const textBlock = document.querySelector(".texto");
+
+  textBlock.onpointermove = (e) => {
+    st.chars.forEach((char) => {
+      const rect = char.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        gsap.to(char, {
+          overwrite: true,
+          duration: 1.2 -dist / 100,
+          scrambleText: { 
+            text: char.dataset.contet,
+            chars: ".:",
+            speed: 0.5,
+        },
+          ease: "none"
+        });
+      }
+    });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="App">
+
+      <div ref={container} className='texto'>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+    </div>
   )
 }
 
